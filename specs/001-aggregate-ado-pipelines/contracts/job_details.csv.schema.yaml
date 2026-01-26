@@ -1,0 +1,25 @@
+version: 1
+kind: csv-schema
+name: job_details
+columns:
+  - name: org_url
+    type: string
+  - name: project_id
+    type: string
+  - name: pipeline_id
+    type: integer
+  - name: run_id
+    type: integer
+  - name: job_id
+    type: integer
+  - name: job_name
+    type: string
+  - name: duration_seconds
+    type: integer
+  - name: pool_id
+    type: integer
+  - name: pool_name
+    type: string
+notes:
+  - Emitted only when `--jobs_output` provided.
+  - Pool fields must be present for all jobs in mocked data.

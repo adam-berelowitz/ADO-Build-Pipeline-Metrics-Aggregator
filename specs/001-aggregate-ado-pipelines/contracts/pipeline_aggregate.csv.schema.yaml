@@ -1,0 +1,23 @@
+version: 1
+kind: csv-schema
+name: pipeline_aggregate
+columns:
+  - name: org_url
+    type: string
+  - name: project_id
+    type: string
+  - name: project_name
+    type: string
+  - name: pipeline_id
+    type: integer
+  - name: pipeline_name
+    type: string
+  - name: run_count
+    type: integer
+  - name: avg_duration_seconds
+    type: integer
+  - name: total_duration_seconds
+    type: integer
+notes:
+  - Deterministic column order; stable across versions.
+  - Values computed from mocked runs within [begin, end) window.

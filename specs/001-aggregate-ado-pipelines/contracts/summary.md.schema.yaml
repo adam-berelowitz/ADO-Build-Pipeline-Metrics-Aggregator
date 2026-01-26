@@ -1,0 +1,46 @@
+version: 1
+kind: markdown-schema
+name: human_readable_summary
+sections:
+  - name: Overview
+    fields:
+      - key: org_count
+        type: integer
+      - key: project_count
+        type: integer
+      - key: pipeline_count
+        type: integer
+      - key: total_runs
+        type: integer
+      - key: total_duration_seconds
+        type: integer
+      - key: avg_duration_seconds
+        type: integer
+  - name: By Organization
+    repeat_by: org_url
+    fields:
+      - key: project_count
+        type: integer
+      - key: pipeline_count
+        type: integer
+      - key: total_runs
+        type: integer
+      - key: total_duration_seconds
+        type: integer
+      - key: avg_duration_seconds
+        type: integer
+  - name: By Project
+    repeat_by: project_id
+    fields:
+      - key: project_name
+        type: string
+      - key: pipeline_count
+        type: integer
+      - key: total_runs
+        type: integer
+      - key: total_duration_seconds
+        type: integer
+        
+notes:
+  - Summary file defaults to `<output>.summary.md` when `--output` is provided.
+  - Otherwise require `--summary_output` flag.
