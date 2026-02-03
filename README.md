@@ -1,15 +1,13 @@
 # Azure DevOps Pipeline Aggregation Tool
 
-A Python CLI tool that aggregates Azure DevOps pipeline (build) duration metrics across multiple organizations and projects. Supports both **live Azure DevOps API data** and **deterministic mock data** for testing and demonstration purposes.
+A Python CLI tool that aggregates Azure DevOps pipeline (build) duration metrics across multiple organizations and projects using the Azure DevOps REST API.
 
 ## Features
 
 - **Multi-organization support**: Process multiple Azure DevOps organizations in a single run
-- **Live API or Mock data**: Use real Azure DevOps APIs with `--live` flag or deterministic mocks
 - **Pipeline aggregation**: Generate per-pipeline statistics including run counts and duration metrics
 - **Job-level details**: Optional detailed job information with agent pool assignments
 - **Human-readable summaries**: Markdown reports with organization and project breakdowns
-- **Deterministic mocking**: Consistent test data generation based on input parameters (mock mode)
 - **CSV output**: Machine-readable data following documented schemas
 - **Parallel processing**: Configurable threading for improved performance
 
@@ -17,35 +15,26 @@ A Python CLI tool that aggregates Azure DevOps pipeline (build) duration metrics
 
 - **Python**: 3.10 or higher
 - **Platform**: Windows PowerShell 5.1 (cross-platform compatible)
-- **Personal Access Token**: Azure DevOps PAT (required for live mode, can be mocked for testing)
-- **Dependencies**: `requests` module (required for live mode: `pip install requests`)
+- **Personal Access Token**: Azure DevOps PAT with appropriate permissions
+- **Dependencies**: `requests` module (`pip install requests`)
 
 ## Installation
 
 1. Clone or download this repository
-2. For **mock mode**: No additional dependencies required (uses Python standard library)
-3. For **live mode**: Install requests: `pip install requests`
-4. Set `AZDO_PAT` environment variable or use `--pat` flag
+2. Install dependencies: `pip install requests`
+3. Set `AZDO_PAT` environment variable or use `--pat` flag
 
 ## Quick Start
 
-### Basic Usage - Single Organization (Mock Data)
+### Basic Usage - Single Organization
 
 ```powershell
-# Generate pipeline aggregates with summary using mock data
+# Generate pipeline aggregates with summary
 python get-build-durations.py --org-url https://dev.azure.com/myorg --begin 2024-01-01 --end 2024-01-31 --output pipelines.csv
 
 # This creates:
 # - pipelines.csv (pipeline aggregation data)
 # - pipelines.summary.md (human-readable summary)
-```
-
-### Live Azure DevOps API Data
-
-```powershell
-# Get real data from Azure DevOps (requires valid PAT and requests module)
-pip install requests
-python get-build-durations.py --live --org-url https://dev.azure.com/myorg --begin 2024-01-01 --end 2024-01-31 --output real_pipelines.csv
 ```
 
 ### Multi-Organization with Job Details
@@ -86,7 +75,7 @@ python get-build-durations.py --org-url https://dev.azure.com/myorg --begin 2024
 | `--max-projects` | | Limit number of projects processed (for testing) |
 | `--delay` | | Delay in ms between requests (default: 0) |
 | `--verbose` | | Enable verbose logging to stderr |
-| `--live` | | Use live Azure DevOps API instead of mocked data (requires requests module) |
+| `--mock` | | Use deterministic mock data instead of live API (for testing) |
 
 ## Output Files
 
@@ -127,16 +116,10 @@ Human-readable report including:
 
 ## Authentication
 
-The tool requires an Azure DevOps Personal Access Token (PAT) for authentication:
-
-### Live Mode (Real API Data)
-Requires a valid PAT with appropriate permissions:
+The tool requires an Azure DevOps Personal Access Token (PAT) with the following permissions:
 - **Build**: Read
 - **Project and team**: Read
 - **Agent Pools**: Read (if using `--jobs_output`)
-
-### Mock Mode (Default)
-Any non-empty PAT value will work since no actual API calls are made.
 
 ### Option 1: Environment Variable (Recommended)
 ```powershell
@@ -149,15 +132,11 @@ python get-build-durations.py --org-url https://dev.azure.com/myorg --begin 2024
 python get-build-durations.py --pat "your_pat_token_here" --org-url https://dev.azure.com/myorg --begin 2024-01-01 --end 2024-01-31
 ```
 
-**Note**: 
-- **Mock mode (default)**: Any non-empty PAT value will work for testing
-- **Live mode (`--live` flag)**: Requires valid PAT and `requests` module
-
 ## Examples
 
-### Example 1: Monthly Report for Single Organization (Mock)
+### Example 1: Monthly Report for Single Organization
 ```powershell
-$env:AZDO_PAT = "mock_token"
+$env:AZDO_PAT = "your_pat_token"
 python get-build-durations.py `
   --org-url https://dev.azure.com/contoso `
   --begin 2024-01-01 `
@@ -166,23 +145,10 @@ python get-build-durations.py `
   --verbose
 ```
 
-### Example 1b: Monthly Report for Single Organization (Live API)
-```powershell
-$env:AZDO_PAT = "your_real_pat_token"
-pip install requests
-python get-build-durations.py `
-  --live `
-  --org-url https://dev.azure.com/contoso `
-  --begin 2024-01-01 `
-  --end 2024-02-01 `
-  --output january_real_pipelines.csv `
-  --verbose
-```
-
 ### Example 2: Multi-Organization Quarterly Report
 ```powershell
 python get-build-durations.py `
-  --pat "mock_token" `
+  --pat "your_pat_token" `
   --org-url https://dev.azure.com/contoso `
   --org-url https://dev.azure.com/fabrikam `
   --org-url https://dev.azure.com/northwind `
@@ -194,14 +160,14 @@ python get-build-durations.py `
   --threads 6
 ```
 
-### Example 3: Performance Testing
+### Example 3: Rate-Limited Processing
 ```powershell
-# Limit to 5 projects per org with 100ms delays
+# Add delays between API requests to avoid rate limiting
 python get-build-durations.py `
   --org-url https://dev.azure.com/testorg `
   --begin 2024-01-01 `
   --end 2024-01-31 `
-  --output test.csv `
+  --output pipelines.csv `
   --max-projects 5 `
   --delay 100 `
   --verbose
@@ -226,37 +192,18 @@ ERROR: Could not parse datetime 'invalid-date'. Supported formats: %Y-%m-%d, %Y-
 get-build-durations.py: error: the following arguments are required: --org-url
 ```
 
-## Data Model
-
-All data is generated using deterministic mocks based on:
-- Organization URL
-- Date range (begin/end)
-- API version
-
-This ensures consistent, reproducible results for testing and demonstration purposes.
-
-### Mock Data Characteristics
-- **Organizations**: 3-8 projects per org
-- **Projects**: 2-6 pipelines per project  
-- **Pipelines**: 2-15 runs per pipeline in date range
-- **Jobs**: 1-4 jobs per run
-- **Durations**: 2-45 minutes for pipeline runs, 30 seconds-20 minutes for jobs
-- **Success Rate**: ~85% succeeded, ~12% failed, ~3% canceled
-
 ## Performance
 
 - **Threading**: Configurable parallel processing (default: 4 threads)
 - **Memory**: Streaming CSV writes for large datasets
-- **Speed**: Processes thousands of mock runs in under a few minutes
-- **Delays**: Configurable request delays for rate limiting (mock mode ignores this)
+- **Delays**: Configurable request delays for rate limiting
 
 ## Technical Details
 
 - **Language**: Python 3.10+
-- **Dependencies**: Standard library only (`argparse`, `csv`, `datetime`, `concurrent.futures`, etc.)
+- **Dependencies**: `requests` module for Azure DevOps API calls
 - **Architecture**: Single-file CLI script
-- **Output**: Deterministic CSV and Markdown generation
-- **Testing**: Manual smoke testing with consistent mock data
+- **Output**: CSV and Markdown generation
 
 ## Project Structure
 
@@ -271,8 +218,14 @@ get-build-durations/
 │       ├── tasks.md           # Task breakdown
 │       ├── quickstart.md      # Quick reference
 │       └── contracts/         # Output schemas
+├── test/                      # Test data and mock mode documentation
+│   └── README.md              # Testing guide with mock data
 └── .gitignore                 # Git ignore patterns
 ```
+
+## Testing
+
+The script supports a mock mode for testing without Azure DevOps access. See `test/README.md` for detailed instructions on running tests with mock data.
 
 ## Contributing
 

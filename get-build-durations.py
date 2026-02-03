@@ -31,7 +31,7 @@ POOLS_CACHE: Dict[int, Dict[str, Any]] = {}
 AGENT_POOLS_CACHE: Dict[int, Dict[str, Any]] = {}
 
 # Mock mode configuration
-# MOCK_MODE will be set based on --live flag (default: mock mode as per FR-010)
+# MOCK_MODE will be set based on --mock flag (default: live mode)
 
 def get_deterministic_seed(org_url: str, begin: str, end: str) -> int:
     """Generate deterministic seed from org URL and date range."""
@@ -240,9 +240,9 @@ def parse_args() -> argparse.Namespace:
     )
 
     parser.add_argument(
-        "--live",
+        "--mock",
         action="store_true",
-        help="Use live Azure DevOps API instead of mocked data (requires requests module)",
+        help="Use deterministic mock data instead of live Azure DevOps API (for testing)",
     )
 
     return parser.parse_args()
@@ -1059,8 +1059,8 @@ def main() -> None:
     global VERBOSE
     args = parse_args()
 
-    # Set mock mode based on --live flag
-    MOCK_MODE = not args.live
+    # Set mock mode based on --mock flag (live is now the default)
+    MOCK_MODE = args.mock
     
     VERBOSE = bool(getattr(args, "verbose", False))
     if VERBOSE:
