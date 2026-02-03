@@ -121,16 +121,42 @@ The tool requires an Azure DevOps Personal Access Token (PAT) with the following
 - **Project and team**: Read
 - **Agent Pools**: Read (if using `--jobs_output`)
 
-### Option 1: Environment Variable (Recommended)
+### Single Organization
+
+For a single organization, use either an environment variable or command line flag:
+
 ```powershell
+# Option 1: Environment variable (recommended)
 $env:AZDO_PAT = "your_pat_token_here"
 python get-build-durations.py --org-url https://dev.azure.com/myorg --begin 2024-01-01 --end 2024-01-31
-```
 
-### Option 2: Command Line Flag
-```powershell
+# Option 2: Command line flag
 python get-build-durations.py --pat "your_pat_token_here" --org-url https://dev.azure.com/myorg --begin 2024-01-01 --end 2024-01-31
 ```
+
+### Multiple Organizations with Different PATs
+
+Azure DevOps PATs are organization-specific. When querying multiple organizations, you can use organization-specific environment variables:
+
+```powershell
+# Set org-specific PATs using AZDO_PAT_<ORGNAME> pattern
+$env:AZDO_PAT_CONTOSO = "pat_for_contoso_org"
+$env:AZDO_PAT_FABRIKAM = "pat_for_fabrikam_org"
+
+# Run against multiple orgs - each will use its org-specific PAT
+python get-build-durations.py `
+  --org-url https://dev.azure.com/contoso `
+  --org-url https://dev.azure.com/fabrikam `
+  --begin 2024-01-01 --end 2024-01-31 `
+  --output multi_org_pipelines.csv
+```
+
+**PAT Resolution Order** (per organization):
+1. `AZDO_PAT_<ORGNAME>` - Organization-specific environment variable (e.g., `AZDO_PAT_CONTOSO`)
+2. `AZDO_PAT` - Default fallback environment variable
+3. `--pat` - Command line argument (used as fallback for all orgs)
+
+**Note**: The organization name is extracted from the URL and converted to uppercase for the environment variable lookup. For `https://dev.azure.com/myorg`, the script looks for `AZDO_PAT_MYORG`.
 
 ## Examples
 
@@ -145,10 +171,14 @@ python get-build-durations.py `
   --verbose
 ```
 
-### Example 2: Multi-Organization Quarterly Report
+### Example 2: Multi-Organization with Org-Specific PATs
 ```powershell
+# Set organization-specific PATs
+$env:AZDO_PAT_CONTOSO = "pat_for_contoso"
+$env:AZDO_PAT_FABRIKAM = "pat_for_fabrikam"
+$env:AZDO_PAT_NORTHWIND = "pat_for_northwind"
+
 python get-build-durations.py `
-  --pat "your_pat_token" `
   --org-url https://dev.azure.com/contoso `
   --org-url https://dev.azure.com/fabrikam `
   --org-url https://dev.azure.com/northwind `

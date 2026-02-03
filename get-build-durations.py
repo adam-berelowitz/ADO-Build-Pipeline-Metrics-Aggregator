@@ -33,6 +33,53 @@ AGENT_POOLS_CACHE: Dict[int, Dict[str, Any]] = {}
 # Mock mode configuration
 # MOCK_MODE will be set based on --mock flag (default: live mode)
 
+def get_org_name(org_url: str) -> str:
+    """Extract organization name from Azure DevOps URL.
+    
+    Supports both URL formats:
+    - https://dev.azure.com/myorg -> myorg
+    - https://myorg.visualstudio.com -> myorg
+    """
+    url = org_url.rstrip('/')
+    if 'dev.azure.com' in url:
+        return url.split('/')[-1]
+    elif 'visualstudio.com' in url:
+        # https://myorg.visualstudio.com -> myorg
+        return url.split('//')[1].split('.')[0]
+    # Fallback: last path segment
+    return url.split('/')[-1]
+
+def get_pat_for_org(org_url: str, default_pat: str | None, verbose: bool = False) -> str | None:
+    """Resolve PAT for a specific organization.
+    
+    Resolution order:
+    1. AZDO_PAT_<ORGNAME> environment variable (case-insensitive org name)
+    2. default_pat (from --pat or AZDO_PAT)
+    
+    Args:
+        org_url: The Azure DevOps organization URL
+        default_pat: Fallback PAT from --pat argument or AZDO_PAT env var
+        verbose: Whether to log PAT resolution details
+    
+    Returns:
+        The resolved PAT or None if not found
+    """
+    org_name = get_org_name(org_url)
+    org_specific_env_var = f"AZDO_PAT_{org_name.upper()}"
+    org_specific_pat = os.getenv(org_specific_env_var)
+    
+    if org_specific_pat:
+        if verbose:
+            print(f"Using PAT from {org_specific_env_var} for {org_url}", file=sys.stderr)
+        return org_specific_pat
+    
+    if default_pat:
+        if verbose:
+            print(f"Using default PAT for {org_url}", file=sys.stderr)
+        return default_pat
+    
+    return None
+
 def get_deterministic_seed(org_url: str, begin: str, end: str) -> int:
     """Generate deterministic seed from org URL and date range."""
     key = f"{org_url}|{begin}|{end}|{API_VERSION}"
@@ -165,8 +212,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Get Azure DevOps pipeline (build) durations per pipeline between two dates. "
-            "Supports multiple organizations and generates CSV aggregates plus human-readable summaries. "
-            "All data is mocked for testing purposes."
+            "Supports multiple organizations and generates CSV aggregates plus human-readable summaries."
         )
     )
     parser.add_argument(
@@ -178,8 +224,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--pat",
         help=(
-            "Azure DevOps Personal Access Token. "
-            "If omitted, will read from AZDO_PAT environment variable."
+            "Default Azure DevOps Personal Access Token. "
+            "If omitted, will read from AZDO_PAT environment variable. "
+            "For org-specific PATs, set AZDO_PAT_<ORGNAME> env vars (e.g., AZDO_PAT_MYORG for https://dev.azure.com/myorg)."
         ),
     )
     parser.add_argument(
@@ -1066,11 +1113,8 @@ def main() -> None:
     if VERBOSE:
         print(f"Verbose logging enabled. Mock mode: {MOCK_MODE}", file=sys.stderr)
 
-    # Validate PAT
-    pat = args.pat or os.getenv("AZDO_PAT")
-    if not pat:
-        print("ERROR: Provide PAT via --pat or AZDO_PAT env var.", file=sys.stderr)
-        sys.exit(1)
+    # Get default PAT (used as fallback for org-specific PATs)
+    default_pat = args.pat or os.getenv("AZDO_PAT")
 
     # Validate and parse date range
     try:
@@ -1096,6 +1140,16 @@ def main() -> None:
         print("ERROR: At least one --org-url must be provided.", file=sys.stderr)
         sys.exit(1)
 
+    # Validate that each org has a resolvable PAT (unless in mock mode)
+    if not MOCK_MODE:
+        for org_url in org_urls:
+            org_pat = get_pat_for_org(org_url, default_pat, verbose=False)
+            if not org_pat:
+                org_name = get_org_name(org_url)
+                print(f"ERROR: No PAT found for organization '{org_name}' ({org_url}).", file=sys.stderr)
+                print(f"       Set AZDO_PAT_{org_name.upper()} environment variable, or provide --pat or AZDO_PAT as fallback.", file=sys.stderr)
+                sys.exit(1)
+
     if VERBOSE:
         print(f"Processing {len(org_urls)} organization(s): {org_urls}", file=sys.stderr)
         print(f"Date range: {args.begin} to {args.end}", file=sys.stderr)
@@ -1119,6 +1173,9 @@ def main() -> None:
         # Generate deterministic seed for this org
         seed = get_deterministic_seed(org_url, args.begin, args.end)
         
+        # Get org-specific PAT
+        org_pat = get_pat_for_org(org_url, default_pat, verbose=VERBOSE)
+        
         # Get projects (mock or real)
         if MOCK_MODE:
             projects = generate_mock_projects(org_url, seed)
@@ -1126,8 +1183,8 @@ def main() -> None:
             if not REQUESTS_AVAILABLE:
                 print("ERROR: requests module not available for live API mode. Install with: pip install requests", file=sys.stderr)
                 sys.exit(1)
-            # Use real Azure DevOps API
-            auth = get_auth(pat)
+            # Use real Azure DevOps API with org-specific PAT
+            auth = get_auth(org_pat)
             try:
                 projects = get_projects(org_url, auth)
             except Exception as e:
@@ -1169,7 +1226,7 @@ def main() -> None:
                             len(projects),
                             project,
                             org_url,
-                            get_auth(pat),
+                            get_auth(org_pat),
                             min_finish_time,
                             max_finish_time,
                             args.delay,

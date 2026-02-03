@@ -1,0 +1,115 @@
+org_url,project_id,project_name,pipeline_id,pipeline_name,run_count,avg_duration_seconds,total_duration_seconds
+https://dev.azure.com/Supportability,c7b3c56f-b50b-43ad-a6c3-c022389d8f3c,AzureDataExplorer,166,BackendService,3,174,523
+https://dev.azure.com/Supportability,a3568879-ce73-4fb4-b910-05406f9f7087,AzureAppServicesTDP,361,BackendService,3,305,915
+https://dev.azure.com/Supportability,a3568879-ce73-4fb4-b910-05406f9f7087,AzureAppServicesTDP,362,Scheduled,3,183,551
+https://dev.azure.com/Supportability,a3568879-ce73-4fb4-b910-05406f9f7087,AzureAppServicesTDP,363,Continuous,3,153,459
+https://dev.azure.com/Supportability,e4018b0c-4cdc-45c2-b40c-e652846cc369,SharePointOn-Prem,81,BackendService,3,347,1042
+https://dev.azure.com/Supportability,e4018b0c-4cdc-45c2-b40c-e652846cc369,SharePointOn-Prem,82,Scheduled,3,182,547
+https://dev.azure.com/Supportability,a0ac5b5f-35fe-4f0a-94b9-29a5cf931253,Azure Purview,150,BackendService,3,326,978
+https://dev.azure.com/Supportability,3b4473c0-1874-42e1-813f-d77d9770d091,WindowsVirtualDesktop,280,Continuous,3,222,668
+https://dev.azure.com/Supportability,3b4473c0-1874-42e1-813f-d77d9770d091,WindowsVirtualDesktop,278,BackendService,3,306,920
+https://dev.azure.com/Supportability,3b4473c0-1874-42e1-813f-d77d9770d091,WindowsVirtualDesktop,279,Scheduled,3,190,571
+https://dev.azure.com/Supportability,5e770886-4c96-46b2-96a9-3d634319cd13,ConfigurationManager,146,BackendService,846,783,662608
+https://dev.azure.com/Supportability,5e770886-4c96-46b2-96a9-3d634319cd13,ConfigurationManager,147,Scheduled,28,241,6755
+https://dev.azure.com/Supportability,76ffe737-dd39-47b1-b382-e4bab768eec7,WindowsDevicesDeployment,621,"Backup - Monthly, First Sunday",2,494,988
+https://dev.azure.com/Supportability,76ffe737-dd39-47b1-b382-e4bab768eec7,WindowsDevicesDeployment,614,Remove en-US from URLs in .md files,3,436,1310
+https://dev.azure.com/Supportability,308b4417-d609-453e-950c-0f00274a65e1,AzureArcforSQLServer,203,BackendService,3,267,801
+https://dev.azure.com/Supportability,7f286668-f820-4dc6-b14d-e2b3ee9c41c2,DynamicsBC,443,BackendService,4,239,958
+https://dev.azure.com/Supportability,7f286668-f820-4dc6-b14d-e2b3ee9c41c2,DynamicsBC,441,Scheduled,3,176,530
+https://dev.azure.com/Supportability,2a9b101e-6873-47ea-83ca-ad57a949cd8a,Azure Stack Hub,17,AzureStack-Css-Lab-Automation-Build-Prod,5,111,557
+https://dev.azure.com/Supportability,2a9b101e-6873-47ea-83ca-ad57a949cd8a,Azure Stack Hub,525,AzureStack.DynamicTest.wiki - DynamicPipeline,1,190,190
+https://dev.azure.com/Supportability,2a9b101e-6873-47ea-83ca-ad57a949cd8a,Azure Stack Hub,493,AzureStack.wiki Build,3,224,674
+https://dev.azure.com/Supportability,e09a4cc7-e0d5-4460-a6dd-392c2b07131f,AzureSpringCloud,196,BackendService,3,191,575
+https://dev.azure.com/Supportability,e09a4cc7-e0d5-4460-a6dd-392c2b07131f,AzureSpringCloud,197,Scheduled,3,149,448
+https://dev.azure.com/Supportability,e09a4cc7-e0d5-4460-a6dd-392c2b07131f,AzureSpringCloud,198,Continuous,3,174,524
+https://dev.azure.com/Supportability,6e1f91fa-9d05-431a-84a6-b7254ac681fa,AAAP_Code,585,Alt Images Check,1137,219,250054
+https://dev.azure.com/Supportability,6e1f91fa-9d05-431a-84a6-b7254ac681fa,AAAP_Code,578,Wiki Content Check,99,182,18072
+https://dev.azure.com/Supportability,6e1f91fa-9d05-431a-84a6-b7254ac681fa,AAAP_Code,586,Yaml Tags Check,96,185,17807
+https://dev.azure.com/Supportability,1c56ccc1-bd3f-4aa8-9a90-bb1ae1d4dd18,1ESPipelineTemplates,625,1ESPT_supportability_Validation,3,981,2943
+https://dev.azure.com/Supportability,5dda2d4d-8b87-4621-90d4-1b3392cf10f0,Developer,53,BackendService,4,1011,4044
+https://dev.azure.com/Supportability,5dda2d4d-8b87-4621-90d4-1b3392cf10f0,Developer,514,PullWikiPageViewCount,3,309,928
+https://dev.azure.com/Supportability,f3a37cb5-3492-4581-8dbd-f3381f2b1736,AzureAD,138,Scheduled,3,274,824
+https://dev.azure.com/Supportability,f3a37cb5-3492-4581-8dbd-f3381f2b1736,AzureAD,137,BackendService,3,1155,3466
+https://dev.azure.com/Supportability,b5a95e35-21ed-4fec-a852-cf1dba4eff75,Intune,64,Scheduled,3,136,409
+https://dev.azure.com/Supportability,b5a95e35-21ed-4fec-a852-cf1dba4eff75,Intune,63,BackendService,3,209,627
+https://dev.azure.com/Supportability,22af027b-5ef7-455e-b69a-6eb43a0a266f,ASMS,134,BackendService,3,262,786
+https://dev.azure.com/Supportability,22af027b-5ef7-455e-b69a-6eb43a0a266f,ASMS,135,Scheduled,3,152,458
+https://dev.azure.com/Supportability,5993b8d8-0af1-4893-9cb2-17e1dcd4f4a1,AzureHPCandAI,438,BackendService,3,324,974
+https://dev.azure.com/Supportability,9995ed9d-dbd7-4234-bf4f-3764c70124b3,WindowsEE,357,BackendService,3,218,654
+https://dev.azure.com/Supportability,9995ed9d-dbd7-4234-bf4f-3764c70124b3,WindowsEE,358,Scheduled,3,158,476
+https://dev.azure.com/Supportability,9995ed9d-dbd7-4234-bf4f-3764c70124b3,WindowsEE,359,Continuous,3,157,471
+https://dev.azure.com/Supportability,54bf3fc0-bbc9-4b66-b5c0-36bdb8b2f173,SPOContentAndReadiness,252,BackendService,3,203,611
+https://dev.azure.com/Supportability,54bf3fc0-bbc9-4b66-b5c0-36bdb8b2f173,SPOContentAndReadiness,253,Scheduled,3,257,773
+https://dev.azure.com/Supportability,54bf3fc0-bbc9-4b66-b5c0-36bdb8b2f173,SPOContentAndReadiness,254,Continuous,3,165,495
+https://dev.azure.com/Supportability,81d193b6-9379-4fc7-b5a1-837c198bb39e,AzureIoT,199,BackendService,3,585,1757
+https://dev.azure.com/Supportability,81d193b6-9379-4fc7-b5a1-837c198bb39e,AzureIoT,200,Scheduled,3,159,477
+https://dev.azure.com/Supportability,81d193b6-9379-4fc7-b5a1-837c198bb39e,AzureIoT,201,Continuous,3,178,534
+https://dev.azure.com/Supportability,ac40d325-6ddd-4e5a-b4e8-ddd8e98d6c19,AzureGovernmentUS,40,Scheduled,3,163,489
+https://dev.azure.com/Supportability,ac40d325-6ddd-4e5a-b4e8-ddd8e98d6c19,AzureGovernmentUS,39,BackendService,3,244,733
+https://dev.azure.com/Supportability,940135df-fc84-4b3d-b222-9e54676444dc,AzureManagedInstanceApacheCassandra,290,BackendService,3,178,535
+https://dev.azure.com/Supportability,940135df-fc84-4b3d-b222-9e54676444dc,AzureManagedInstanceApacheCassandra,291,Scheduled,3,329,987
+https://dev.azure.com/Supportability,940135df-fc84-4b3d-b222-9e54676444dc,AzureManagedInstanceApacheCassandra,292,Continuous,3,184,554
+https://dev.azure.com/Supportability,1889eddf-6eba-40c1-9063-c1460196210e,Office,67,BackendService,3,324,973
+https://dev.azure.com/Supportability,1889eddf-6eba-40c1-9063-c1460196210e,Office,68,Scheduled,3,267,803
+https://dev.azure.com/Supportability,1889eddf-6eba-40c1-9063-c1460196210e,Office,415,Continuous,3,167,503
+https://dev.azure.com/Supportability,9b4341b4-f370-4efd-b44e-4f308dcaae67,Surface,91,BackendService,3,256,770
+https://dev.azure.com/Supportability,9b4341b4-f370-4efd-b44e-4f308dcaae67,Surface,92,Scheduled,3,141,425
+https://dev.azure.com/Supportability,4c5e8ae6-12e8-416e-a682-5a573e48d14f,PowerPlatform,350,Continuous,3,218,656
+https://dev.azure.com/Supportability,4c5e8ae6-12e8-416e-a682-5a573e48d14f,PowerPlatform,348,BackendService,3,1548,4645
+https://dev.azure.com/Supportability,4c5e8ae6-12e8-416e-a682-5a573e48d14f,PowerPlatform,349,Scheduled,3,754,2263
+https://dev.azure.com/Supportability,4c5e8ae6-12e8-416e-a682-5a573e48d14f,PowerPlatform,371,PAD-Releases,3,163,491
+https://dev.azure.com/Supportability,4c5e8ae6-12e8-416e-a682-5a573e48d14f,PowerPlatform,416,Top10 Read,27,480,12982
+https://dev.azure.com/Supportability,4c5e8ae6-12e8-416e-a682-5a573e48d14f,PowerPlatform,420,Last10,26,291,7582
+https://dev.azure.com/Supportability,4c5e8ae6-12e8-416e-a682-5a573e48d14f,PowerPlatform,372,Dynamics Wiki 4 Way Sync,88,653,57533
+https://dev.azure.com/Supportability,870b0c89-5235-4a33-a0c6-44be26e284e7,AzureHDinsight,130,BackendService,3,797,2392
+https://dev.azure.com/Supportability,11be99a2-2d90-4011-81f9-dad05881076b,Modern Workplace,461,Merge Validation,72,117,8476
+https://dev.azure.com/Supportability,15ab72f0-1239-430d-95c3-59b5f706c68d,AzureContainers,595,Scheduled media cleanup,3,129,388
+https://dev.azure.com/Supportability,15ab72f0-1239-430d-95c3-59b5f706c68d,AzureContainers,634,actlabs,11,915,10065
+https://dev.azure.com/Supportability,15ab72f0-1239-430d-95c3-59b5f706c68d,AzureContainers,428,Wiki Content Linting,73,467,34118
+https://dev.azure.com/Supportability,d71be795-62a4-4613-9918-217237a648ba,WindowsDirectoryServices,231,BackendService,3,596,1790
+https://dev.azure.com/Supportability,669af050-0489-4be3-a6b4-a7cc538cf0f6,AzureStreamAnalytics,164,BackendService,3,210,632
+https://dev.azure.com/Supportability,669af050-0489-4be3-a6b4-a7cc538cf0f6,AzureStreamAnalytics,165,Scheduled,3,140,420
+https://dev.azure.com/Supportability,1c0227a4-055b-4fa3-9b45-ad3ddbdf0f30,AzureMigrate,106,BackendService,3,284,854
+https://dev.azure.com/Supportability,925e376b-69d2-41b2-8f63-81167df95fa1,CSS Azure AI,400,BackendService,3,165,495
+https://dev.azure.com/Supportability,925e376b-69d2-41b2-8f63-81167df95fa1,CSS Azure AI,401,Scheduled,3,152,456
+https://dev.azure.com/Supportability,925e376b-69d2-41b2-8f63-81167df95fa1,CSS Azure AI,402,Continuous,3,147,441
+https://dev.azure.com/Supportability,1775597e-8244-45ac-9b6c-727947639c82,SSIS,294,Scheduled,3,157,473
+https://dev.azure.com/Supportability,1775597e-8244-45ac-9b6c-727947639c82,SSIS,295,Continuous,3,166,500
+https://dev.azure.com/Supportability,1775597e-8244-45ac-9b6c-727947639c82,SSIS,293,BackendService,3,215,647
+https://dev.azure.com/Supportability,eb6305d7-aa10-4314-9796-d008486c53ea,DevCommunity,51,BackendService,3,406,1219
+https://dev.azure.com/Supportability,373f52df-6ad7-4169-bff7-f0e642c7e59e,WindowsNetworking,360,Continuous,3,194,583
+https://dev.azure.com/Supportability,373f52df-6ad7-4169-bff7-f0e642c7e59e,WindowsNetworking,177,BackendService,3,539,1618
+https://dev.azure.com/Supportability,373f52df-6ad7-4169-bff7-f0e642c7e59e,WindowsNetworking,178,Scheduled,3,203,610
+https://dev.azure.com/Supportability,78a7ff76-f175-4f9e-8e72-04fdfd3daeaa,HighComplexityLowVolume,141,BackendService,3,163,489
+https://dev.azure.com/Supportability,a03b151b-4d52-48bd-9473-8b788f765362,SharePointOnline,302,BackendService,3,350,1052
+https://dev.azure.com/Supportability,a03b151b-4d52-48bd-9473-8b788f765362,SharePointOnline,303,Scheduled,3,212,638
+https://dev.azure.com/Supportability,a03b151b-4d52-48bd-9473-8b788f765362,SharePointOnline,305,Continuous,3,158,475
+https://dev.azure.com/Supportability,3a1ec150-d580-430e-b820-ded549fdd562,TeamsContentAndReadiness,246,BackendService,3,307,922
+https://dev.azure.com/Supportability,3a1ec150-d580-430e-b820-ded549fdd562,TeamsContentAndReadiness,247,Scheduled,3,198,596
+https://dev.azure.com/Supportability,3a1ec150-d580-430e-b820-ded549fdd562,TeamsContentAndReadiness,248,Continuous,3,213,641
+https://dev.azure.com/Supportability,649ae07d-9f92-4297-84f5-3cb2f8e40de2,AMCSSupport,474,Continuous,3,177,532
+https://dev.azure.com/Supportability,649ae07d-9f92-4297-84f5-3cb2f8e40de2,AMCSSupport,470,BackendService,3,315,947
+https://dev.azure.com/Supportability,649ae07d-9f92-4297-84f5-3cb2f8e40de2,AMCSSupport,472,Scheduled,3,239,718
+https://dev.azure.com/Supportability,79e1fd10-fe87-4a9f-96e1-64b674fcda90,DynamicsFO,285,Scheduled,3,326,978
+https://dev.azure.com/Supportability,79e1fd10-fe87-4a9f-96e1-64b674fcda90,DynamicsFO,286,Continuous,3,256,770
+https://dev.azure.com/Supportability,79e1fd10-fe87-4a9f-96e1-64b674fcda90,DynamicsFO,284,BackendService,3,7102,21308
+https://dev.azure.com/Supportability,7eb83b46-9e67-4256-972b-8ca9bd6ddeaf,AzureIaaSReadiness,170,BackendService,3,187,561
+https://dev.azure.com/Supportability,7eb83b46-9e67-4256-972b-8ca9bd6ddeaf,AzureIaaSReadiness,171,Scheduled,3,177,533
+https://dev.azure.com/Supportability,c2939df2-c13a-4f84-814b-6ee54e2b879a,WindowsSHA,237,BackendService,3,301,905
+https://dev.azure.com/Supportability,c2939df2-c13a-4f84-814b-6ee54e2b879a,WindowsSHA,238,Scheduled,3,164,492
+https://dev.azure.com/Supportability,c2939df2-c13a-4f84-814b-6ee54e2b879a,WindowsSHA,239,Continuous,3,150,452
+https://dev.azure.com/Supportability,338dd800-8780-49bd-8ae7-7aaff6f25445,AzureResourceMover,228,BackendService,3,183,549
+https://dev.azure.com/Supportability,338dd800-8780-49bd-8ae7-7aaff6f25445,AzureResourceMover,229,Scheduled,3,197,591
+https://dev.azure.com/Supportability,338dd800-8780-49bd-8ae7-7aaff6f25445,AzureResourceMover,230,Continuous,3,167,503
+https://dev.azure.com/Supportability,b0c51f50-d3cb-4b7b-8fb4-690009d3ee65,AzureAdaptiveCloud,628,AzureAdaptiveCloud.wiki Build,780,237,184997
+https://dev.azure.com/Supportability,ce057cf1-e3f6-4f07-80ac-afc7c7fdd354,IntegrationGlobalPod,267,Continuous,3,213,640
+https://dev.azure.com/Supportability,ce057cf1-e3f6-4f07-80ac-afc7c7fdd354,IntegrationGlobalPod,266,Scheduled,836,315,263445
+https://dev.azure.com/Supportability,ce057cf1-e3f6-4f07-80ac-afc7c7fdd354,IntegrationGlobalPod,265,BackendService,844,5258,4438068
+https://dev.azure.com/Supportability,b6b4cd2f-9fc3-4344-b5b9-440a68c03039,AzureAppService,25,BackendService,3,1524,4572
+https://dev.azure.com/Supportability,b6b4cd2f-9fc3-4344-b5b9-440a68c03039,AzureAppService,566,SSV2,3217,795,2558057
+https://dev.azure.com/Supportability,da3f10d7-d7ed-4971-9352-30935904926c,Movere,234,BackendService,3,231,694
+https://dev.azure.com/Supportability,da3f10d7-d7ed-4971-9352-30935904926c,Movere,235,Scheduled,3,168,504
+https://dev.azure.com/Supportability,da3f10d7-d7ed-4971-9352-30935904926c,Movere,236,Continuous,3,153,459
+https://dev.azure.com/CEandS,58997d56-6eb7-4b9f-aaf5-ddb246c3b28a,CSO CTO,24,ExtractAndUpdateBranchFromPowerPlatform,29,167,4862
+https://dev.azure.com/lanterncloudservices,01bcaa76-fc59-45a7-899c-6a3b2fe3d572,GHAzDO Demo,3,GHAzDO Demo,3,348,1044
+https://dev.azure.com/lanterncloudservices,01bcaa76-fc59-45a7-899c-6a3b2fe3d572,GHAzDO Demo,4,CIVerify,1,355,355

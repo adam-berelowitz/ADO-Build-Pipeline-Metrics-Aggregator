@@ -22,6 +22,7 @@ The `get-build-durations.py` script supports a **mock mode** (enabled with the `
 | `test_multi.csv` | Multi-organization pipeline aggregation output |
 | `test_multi.summary.md` | Summary report for multi-organization run |
 | `test_jobs.csv` | Job-level detail output |
+| `livepipelines.summary.md` | Example summary from a live API run against real Azure DevOps organizations |
 
 ## Running Tests with Mock Data
 
@@ -50,7 +51,10 @@ python get-build-durations.py `
 
 ### Multi-Organization Mock Test
 
+In mock mode, any non-empty PAT value works. You can use a single global PAT or test the org-specific PAT resolution:
+
 ```powershell
+# Option 1: Single global PAT (simplest for mock testing)
 $env:AZDO_PAT = "mock_token"
 python get-build-durations.py `
   --mock `
@@ -61,6 +65,20 @@ python get-build-durations.py `
   --output test/multi_org_output.csv `
   --jobs_output test/multi_org_jobs.csv `
   --summary_output test/multi_org_summary.md `
+  --verbose
+```
+
+```powershell
+# Option 2: Test org-specific PAT resolution (simulates production setup)
+$env:AZDO_PAT_ORG1 = "mock_token_org1"
+$env:AZDO_PAT_ORG2 = "mock_token_org2"
+python get-build-durations.py `
+  --mock `
+  --org-url https://dev.azure.com/org1 `
+  --org-url https://dev.azure.com/org2 `
+  --begin 2024-01-01 `
+  --end 2024-02-01 `
+  --output test/multi_org_output.csv `
   --verbose
 ```
 
