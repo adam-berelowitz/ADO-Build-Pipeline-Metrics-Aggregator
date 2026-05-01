@@ -16,8 +16,11 @@ columns:
     type: integer
   - name: avg_duration_seconds
     type: integer
+  - name: median_duration_seconds
+    type: integer
   - name: total_duration_seconds
     type: integer
 notes:
   - Deterministic column order; stable across versions.
   - Values computed from mocked runs within [begin, end) window.
+  - median_duration_seconds is the median of all individual run durations for the pipeline.
