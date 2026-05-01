@@ -6,8 +6,19 @@ import hashlib
 import os
 from pickle import FALSE
 import random
+import statistics
 import sys
 import time
+
+# Import matplotlib/numpy only if needed for chart generation
+try:
+    import matplotlib
+    matplotlib.use('Agg')  # non-interactive backend; must be set before importing pyplot
+    import matplotlib.pyplot as plt
+    import numpy as np
+    MATPLOTLIB_AVAILABLE = True
+except ImportError:
+    MATPLOTLIB_AVAILABLE = False
 
 # Import requests only if needed for non-mock mode
 try:
@@ -290,6 +301,14 @@ def parse_args() -> argparse.Namespace:
         "--mock",
         action="store_true",
         help="Use deterministic mock data instead of live Azure DevOps API (for testing)",
+    )
+
+    parser.add_argument(
+        "--chart_output",
+        help=(
+            "Optional path for a PNG distribution curve chart of pipeline run durations. "
+            "Requires matplotlib and numpy to be installed."
+        ),
     )
 
     return parser.parse_args()
@@ -688,9 +707,14 @@ def aggregate_pipelines_new_format(
     project_id: str,
     project_name: str,
     runs_by_pipeline: Dict[int, List[Dict[str, Any]]]
-) -> List[Dict[str, Any]]:
-    """Aggregate pipeline runs into new CSV format following pipeline_aggregate.csv.schema.yaml"""
+) -> Tuple[List[Dict[str, Any]], List[float]]:
+    """Aggregate pipeline runs into new CSV format following pipeline_aggregate.csv.schema.yaml.
+
+    Returns a tuple of (pipeline_rows, all_run_durations) where all_run_durations is the
+    flat list of every individual run's duration in seconds (used for distribution charts).
+    """
     results = []
+    all_run_durations: List[float] = []
     
     for pipeline_id, runs in runs_by_pipeline.items():
         if not runs:
@@ -698,17 +722,20 @@ def aggregate_pipelines_new_format(
             
         pipeline_name = runs[0].get('definition', {}).get('name', f'Pipeline-{pipeline_id}')
         
-        total_duration_seconds = 0
-        run_count = len(runs)
+        run_durations: List[float] = []
         
         for run in runs:
             duration = parse_duration_seconds(
                 run.get('startTime'), 
                 run.get('finishTime')
             )
-            total_duration_seconds += duration
+            run_durations.append(duration)
+            all_run_durations.append(duration)
         
+        run_count = len(run_durations)
+        total_duration_seconds = sum(run_durations)
         avg_duration_seconds = int(total_duration_seconds / run_count) if run_count > 0 else 0
+        median_duration_seconds = int(statistics.median(run_durations)) if run_durations else 0
         
         results.append({
             'org_url': org_url,
@@ -718,10 +745,11 @@ def aggregate_pipelines_new_format(
             'pipeline_name': pipeline_name,
             'run_count': run_count,
             'avg_duration_seconds': avg_duration_seconds,
+            'median_duration_seconds': median_duration_seconds,
             'total_duration_seconds': int(total_duration_seconds)
         })
     
-    return results
+    return results, all_run_durations
 
 def write_pipeline_csv(file_handle: Any, pipeline_rows: List[Dict[str, Any]]) -> None:
     """T006: Write pipeline CSV following contracts/pipeline_aggregate.csv.schema.yaml"""
@@ -733,6 +761,7 @@ def write_pipeline_csv(file_handle: Any, pipeline_rows: List[Dict[str, Any]]) ->
         'pipeline_name',
         'run_count',
         'avg_duration_seconds',
+        'median_duration_seconds',
         'total_duration_seconds'
     ]
     
@@ -778,6 +807,9 @@ def write_summary_markdown(file_path: str, pipeline_rows: List[Dict[str, Any]]) 
     total_runs = sum(row['run_count'] for row in pipeline_rows)
     total_duration_seconds = sum(row['total_duration_seconds'] for row in pipeline_rows)
     avg_duration_seconds = int(total_duration_seconds / total_runs) if total_runs > 0 else 0
+    median_duration_seconds = int(statistics.median(
+        row['median_duration_seconds'] for row in pipeline_rows
+    )) if pipeline_rows else 0
     
     org_count = len(set(row['org_url'] for row in pipeline_rows))
     project_count = len(set(f"{row['org_url']}|{row['project_id']}" for row in pipeline_rows))
@@ -820,30 +852,116 @@ def write_summary_markdown(file_path: str, pipeline_rows: List[Dict[str, Any]]) 
         f.write(f"- **Pipelines**: {pipeline_count}\n")
         f.write(f"- **Total Runs**: {total_runs}\n")
         f.write(f"- **Total Duration**: {total_duration_seconds:,} seconds ({seconds_to_hms(total_duration_seconds)})\n")
-        f.write(f"- **Average Duration**: {avg_duration_seconds} seconds ({seconds_to_hms(avg_duration_seconds)})\n\n")
+        f.write(f"- **Average Duration**: {avg_duration_seconds} seconds ({seconds_to_hms(avg_duration_seconds)})\n")
+        f.write(f"- **Median Duration**: {median_duration_seconds} seconds ({seconds_to_hms(median_duration_seconds)})\n\n")
         
         # By Organization section
         f.write("## By Organization\n\n")
         for org_url, data in by_org.items():
             org_pipeline_count = len(data['pipelines'])
             org_avg_duration = int(data['total_duration'] / data['total_runs']) if data['total_runs'] > 0 else 0
+            org_median_duration = int(statistics.median(
+                row['median_duration_seconds'] for row in data['pipelines']
+            )) if data['pipelines'] else 0
             
             f.write(f"### {org_url}\n\n")
             f.write(f"- **Pipelines**: {org_pipeline_count}\n")
             f.write(f"- **Total Runs**: {data['total_runs']}\n")
             f.write(f"- **Total Duration**: {data['total_duration']:,} seconds ({seconds_to_hms(data['total_duration'])})\n")
-            f.write(f"- **Average Duration**: {org_avg_duration} seconds ({seconds_to_hms(org_avg_duration)})\n\n")
+            f.write(f"- **Average Duration**: {org_avg_duration} seconds ({seconds_to_hms(org_avg_duration)})\n")
+            f.write(f"- **Median Duration**: {org_median_duration} seconds ({seconds_to_hms(org_median_duration)})\n\n")
         
         # By Project section  
         f.write("## By Project\n\n")
         for project_key, data in by_project.items():
             project_pipeline_count = len(data['pipelines'])
             project_avg_duration = int(data['total_duration'] / data['total_runs']) if data['total_runs'] > 0 else 0
+            project_median_duration = int(statistics.median(
+                row['median_duration_seconds'] for row in data['pipelines']
+            )) if data['pipelines'] else 0
             
             f.write(f"### {data['project_name']} ({data['org_url']})\n\n")
             f.write(f"- **Pipelines**: {project_pipeline_count}\n")
             f.write(f"- **Total Runs**: {data['total_runs']}\n")
-            f.write(f"- **Total Duration**: {data['total_duration']:,} seconds ({seconds_to_hms(data['total_duration'])})\n\n")
+            f.write(f"- **Total Duration**: {data['total_duration']:,} seconds ({seconds_to_hms(data['total_duration'])})\n")
+            f.write(f"- **Average Duration**: {project_avg_duration} seconds ({seconds_to_hms(project_avg_duration)})\n")
+            f.write(f"- **Median Duration**: {project_median_duration} seconds ({seconds_to_hms(project_median_duration)})\n\n")
+
+
+def generate_distribution_chart(
+    chart_path: str,
+    all_run_durations: List[float],
+    pipeline_rows: List[Dict[str, Any]],
+) -> None:
+    """Generate a distribution curve chart (histogram + KDE) of pipeline run durations.
+
+    The chart shows the empirical distribution of individual run durations in minutes,
+    overlaid with a kernel density estimate (KDE) smoothed curve, and vertical markers
+    for the mean and median.
+
+    Args:
+        chart_path: Output PNG file path.
+        all_run_durations: Flat list of every individual run's duration in seconds.
+        pipeline_rows: Aggregated pipeline rows (used for mean/median reference lines).
+    """
+    if not MATPLOTLIB_AVAILABLE:
+        print(
+            "WARNING: matplotlib/numpy not installed; skipping chart generation. "
+            "Install with: pip install matplotlib numpy",
+            file=sys.stderr,
+        )
+        return
+
+    if not all_run_durations:
+        print("WARNING: No run durations available; skipping chart generation.", file=sys.stderr)
+        return
+
+    durations_minutes = [d / 60.0 for d in all_run_durations]
+    data = np.array(durations_minutes)
+
+    total_runs = len(data)
+    mean_val = float(np.mean(data))
+    median_val = float(np.median(data))
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+
+    # Histogram (normalized to density)
+    n_bins = max(10, min(50, total_runs // 5))
+    ax.hist(data, bins=n_bins, density=True, alpha=0.4, color='steelblue', label='Run frequency')
+
+    # KDE curve using numpy-based Gaussian KDE (no scipy dependency)
+    if total_runs >= 2:
+        bandwidth = 1.06 * float(np.std(data)) * (total_runs ** -0.2)
+        if bandwidth > 0:
+            x_min = max(0.0, float(np.min(data)) - bandwidth * 2)
+            x_max = float(np.max(data)) + bandwidth * 2
+            x_grid = np.linspace(x_min, x_max, 300)
+            # Gaussian KDE: sum of Gaussian kernels centred on each point
+            kde_values = np.zeros_like(x_grid)
+            for xi in data:
+                kde_values += np.exp(-0.5 * ((x_grid - xi) / bandwidth) ** 2)
+            kde_values /= (total_runs * bandwidth * np.sqrt(2 * np.pi))
+            ax.plot(x_grid, kde_values, color='steelblue', linewidth=2, label='Distribution curve (KDE)')
+
+    # Vertical reference lines for mean and median
+    ax.axvline(mean_val, color='orange', linestyle='--', linewidth=1.5,
+               label=f'Mean: {mean_val:.1f} min')
+    ax.axvline(median_val, color='green', linestyle='-.', linewidth=1.5,
+               label=f'Median: {median_val:.1f} min')
+
+    ax.set_xlabel('Run Duration (minutes)', fontsize=12)
+    ax.set_ylabel('Density', fontsize=12)
+    ax.set_title(
+        f'Pipeline Run Duration Distribution\n'
+        f'({total_runs:,} runs across {len(pipeline_rows)} pipelines)',
+        fontsize=13,
+    )
+    ax.legend(fontsize=10)
+    ax.grid(axis='y', linestyle=':', alpha=0.5)
+
+    fig.tight_layout()
+    fig.savefig(chart_path, dpi=150)
+    plt.close(fig)
 
 def aggregate_builds_for_project(
     project_name: str,
@@ -929,7 +1047,7 @@ def process_project_live(
     max_finish_time: str,
     delay_ms: int,
     emit_jobs: bool,
-) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[float]]:
     """Process a project using live Azure DevOps API calls"""
     project_name = proj["name"]
     project_id = proj.get("id", proj.get("name", "unknown"))
@@ -954,7 +1072,7 @@ def process_project_live(
                 runs_by_pipeline[pipeline_id].append(build)
         
         # Convert to new aggregation format
-        pipeline_rows = aggregate_pipelines_new_format(org_url, project_id, project_name, runs_by_pipeline)
+        pipeline_rows, run_durations = aggregate_pipelines_new_format(org_url, project_id, project_name, runs_by_pipeline)
         
         # Handle jobs if requested
         job_rows = []
@@ -988,11 +1106,11 @@ def process_project_live(
                     if VERBOSE:
                         print(f"Warning: Failed to get timeline for build {build_id}: {e}", file=sys.stderr)
                     
-        return pipeline_rows, job_rows
+        return pipeline_rows, job_rows, run_durations
         
     except Exception as e:
         print(f"ERROR: Failed to process project {project_name}: {e}", file=sys.stderr)
-        return [], []
+        return [], [], []
 
 def process_project_mock(
     org_url: str,
@@ -1001,7 +1119,7 @@ def process_project_mock(
     end_dt: dt.datetime,
     seed: int,
     emit_jobs: bool = False
-) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], List[float]]:
     """T009: Process a project using deterministic mocks with threading/delay awareness"""
     project_id = project['id']
     project_name = project['name']
@@ -1040,9 +1158,9 @@ def process_project_mock(
                     })
     
     # Aggregate to contract format
-    pipeline_rows = aggregate_pipelines_new_format(org_url, project_id, project_name, runs_by_pipeline)
+    pipeline_rows, run_durations = aggregate_pipelines_new_format(org_url, project_id, project_name, runs_by_pipeline)
     
-    return pipeline_rows, all_jobs
+    return pipeline_rows, all_jobs, run_durations
 
 def resolve_mock_pool(worker_name: str, seed: int) -> Dict[str, Any]:
     """Resolve mock pool info for a worker"""
@@ -1164,6 +1282,7 @@ def main() -> None:
     # Collect all pipeline and job data
     all_pipeline_rows = []
     all_job_rows = []
+    all_run_durations: List[float] = []
 
     # Process each organization
     for org_idx, org_url in enumerate(org_urls):
@@ -1241,12 +1360,10 @@ def main() -> None:
             # Collect results
             for future in as_completed(futures):
                 try:
-                    if MOCK_MODE:
-                        pipeline_rows, job_rows = future.result()
-                    else:
-                        pipeline_rows, job_rows = future.result()
+                    pipeline_rows, job_rows, run_durations = future.result()
                     all_pipeline_rows.extend(pipeline_rows)
                     all_job_rows.extend(job_rows)
+                    all_run_durations.extend(run_durations)
                 except Exception as e:
                     print(f"Warning: Processing failed for a project: {e}", file=sys.stderr)
 
@@ -1270,6 +1387,12 @@ def main() -> None:
         print(f"Summary written to: {summary_path}", file=sys.stderr)
     elif not summary_path and all_pipeline_rows:
         print("INFO: No summary output path specified. Use --summary_output to generate human-readable summary.", file=sys.stderr)
+
+    # Generate distribution chart if requested
+    if args.chart_output:
+        generate_distribution_chart(args.chart_output, all_run_durations, all_pipeline_rows)
+        if MATPLOTLIB_AVAILABLE and all_run_durations:
+            print(f"Distribution chart written to: {args.chart_output}", file=sys.stderr)
 
     print(f"Processing complete. {len(all_pipeline_rows)} pipeline records, {len(all_job_rows)} job records.", file=sys.stderr)
 

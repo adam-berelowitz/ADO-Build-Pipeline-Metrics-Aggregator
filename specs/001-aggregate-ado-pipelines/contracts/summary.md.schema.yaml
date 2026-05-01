@@ -16,6 +16,8 @@ sections:
         type: integer
       - key: avg_duration_seconds
         type: integer
+      - key: median_duration_seconds
+        type: integer
   - name: By Organization
     repeat_by: org_url
     fields:
@@ -29,6 +31,8 @@ sections:
         type: integer
       - key: avg_duration_seconds
         type: integer
+      - key: median_duration_seconds
+        type: integer
   - name: By Project
     repeat_by: project_id
     fields:
@@ -40,7 +44,12 @@ sections:
         type: integer
       - key: total_duration_seconds
         type: integer
+      - key: avg_duration_seconds
+        type: integer
+      - key: median_duration_seconds
+        type: integer
         
 notes:
   - Summary file defaults to `<output>.summary.md` when `--output` is provided.
   - Otherwise require `--summary_output` flag.
+  - median_duration_seconds is computed as the median of per-pipeline median durations within each group.
