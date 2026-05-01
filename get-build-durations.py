@@ -746,7 +746,9 @@ def aggregate_pipelines_new_format(
             'run_count': run_count,
             'avg_duration_seconds': avg_duration_seconds,
             'median_duration_seconds': median_duration_seconds,
-            'total_duration_seconds': int(total_duration_seconds)
+            'total_duration_seconds': int(total_duration_seconds),
+            # Private field (not written to CSV) – used for accurate median aggregation
+            '_run_durations': run_durations,
         })
     
     return results, all_run_durations
@@ -765,11 +767,12 @@ def write_pipeline_csv(file_handle: Any, pipeline_rows: List[Dict[str, Any]]) ->
         'total_duration_seconds'
     ]
     
-    writer = csv.DictWriter(file_handle, fieldnames=fieldnames)
+    writer = csv.DictWriter(file_handle, fieldnames=fieldnames, extrasaction='ignore')
     writer.writeheader()
     
     for row in pipeline_rows:
         writer.writerow(row)
+
 
 def seconds_to_hms(seconds: float) -> str:
     seconds_int = int(round(seconds))
@@ -807,9 +810,9 @@ def write_summary_markdown(file_path: str, pipeline_rows: List[Dict[str, Any]]) 
     total_runs = sum(row['run_count'] for row in pipeline_rows)
     total_duration_seconds = sum(row['total_duration_seconds'] for row in pipeline_rows)
     avg_duration_seconds = int(total_duration_seconds / total_runs) if total_runs > 0 else 0
-    median_duration_seconds = int(statistics.median(
-        row['median_duration_seconds'] for row in pipeline_rows
-    )) if pipeline_rows else 0
+    # True median computed over all individual run durations (stored in the private _run_durations field)
+    all_durations_flat = [d for row in pipeline_rows for d in row.get('_run_durations', [])]
+    median_duration_seconds = int(statistics.median(all_durations_flat)) if all_durations_flat else 0
     
     org_count = len(set(row['org_url'] for row in pipeline_rows))
     project_count = len(set(f"{row['org_url']}|{row['project_id']}" for row in pipeline_rows))
@@ -824,10 +827,11 @@ def write_summary_markdown(file_path: str, pipeline_rows: List[Dict[str, Any]]) 
         project_key = f"{row['org_url']}|{row['project_id']}"
         
         if org_url not in by_org:
-            by_org[org_url] = {'pipelines': [], 'total_runs': 0, 'total_duration': 0}
+            by_org[org_url] = {'pipelines': [], 'total_runs': 0, 'total_duration': 0, 'run_durations': []}
         by_org[org_url]['pipelines'].append(row)
         by_org[org_url]['total_runs'] += row['run_count']
         by_org[org_url]['total_duration'] += row['total_duration_seconds']
+        by_org[org_url]['run_durations'].extend(row.get('_run_durations', []))
         
         if project_key not in by_project:
             by_project[project_key] = {
@@ -835,11 +839,13 @@ def write_summary_markdown(file_path: str, pipeline_rows: List[Dict[str, Any]]) 
                 'org_url': row['org_url'],
                 'pipelines': [],
                 'total_runs': 0,
-                'total_duration': 0
+                'total_duration': 0,
+                'run_durations': [],
             }
         by_project[project_key]['pipelines'].append(row)
         by_project[project_key]['total_runs'] += row['run_count']
         by_project[project_key]['total_duration'] += row['total_duration_seconds']
+        by_project[project_key]['run_durations'].extend(row.get('_run_durations', []))
     
     # Write markdown
     with open(file_path, 'w', encoding='utf-8') as f:
@@ -860,9 +866,8 @@ def write_summary_markdown(file_path: str, pipeline_rows: List[Dict[str, Any]]) 
         for org_url, data in by_org.items():
             org_pipeline_count = len(data['pipelines'])
             org_avg_duration = int(data['total_duration'] / data['total_runs']) if data['total_runs'] > 0 else 0
-            org_median_duration = int(statistics.median(
-                row['median_duration_seconds'] for row in data['pipelines']
-            )) if data['pipelines'] else 0
+            # True median over all individual run durations in this org
+            org_median_duration = int(statistics.median(data['run_durations'])) if data['run_durations'] else 0
             
             f.write(f"### {org_url}\n\n")
             f.write(f"- **Pipelines**: {org_pipeline_count}\n")
@@ -876,9 +881,8 @@ def write_summary_markdown(file_path: str, pipeline_rows: List[Dict[str, Any]]) 
         for project_key, data in by_project.items():
             project_pipeline_count = len(data['pipelines'])
             project_avg_duration = int(data['total_duration'] / data['total_runs']) if data['total_runs'] > 0 else 0
-            project_median_duration = int(statistics.median(
-                row['median_duration_seconds'] for row in data['pipelines']
-            )) if data['pipelines'] else 0
+            # True median over all individual run durations in this project
+            project_median_duration = int(statistics.median(data['run_durations'])) if data['run_durations'] else 0
             
             f.write(f"### {data['project_name']} ({data['org_url']})\n\n")
             f.write(f"- **Pipelines**: {project_pipeline_count}\n")
@@ -931,12 +935,14 @@ def generate_distribution_chart(
 
     # KDE curve using numpy-based Gaussian KDE (no scipy dependency)
     if total_runs >= 2:
+        # Silverman's rule of thumb: h = 1.06 * sigma * n^(-1/5)
+        # This minimises the mean integrated squared error for a Gaussian reference distribution.
         bandwidth = 1.06 * float(np.std(data)) * (total_runs ** -0.2)
         if bandwidth > 0:
             x_min = max(0.0, float(np.min(data)) - bandwidth * 2)
             x_max = float(np.max(data)) + bandwidth * 2
             x_grid = np.linspace(x_min, x_max, 300)
-            # Gaussian KDE: sum of Gaussian kernels centred on each point
+            # Gaussian KDE: sum of Gaussian kernels centered on each data point
             kde_values = np.zeros_like(x_grid)
             for xi in data:
                 kde_values += np.exp(-0.5 * ((x_grid - xi) / bandwidth) ** 2)
