@@ -52,4 +52,4 @@ sections:
 notes:
   - Summary file defaults to `<output>.summary.md` when `--output` is provided.
   - Otherwise require `--summary_output` flag.
-  - median_duration_seconds is computed as the median of per-pipeline median durations within each group.
+  - median_duration_seconds is computed as the median of all individual run durations within each group.

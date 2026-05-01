@@ -936,7 +936,7 @@ def generate_distribution_chart(
     # KDE curve using numpy-based Gaussian KDE (no scipy dependency)
     if total_runs >= 2:
         # Silverman's rule of thumb: h = 1.06 * sigma * n^(-1/5)
-        # This minimises the mean integrated squared error for a Gaussian reference distribution.
+        # This minimizes the mean integrated squared error for a Gaussian reference distribution.
         bandwidth = 1.06 * float(np.std(data)) * (total_runs ** -0.2)
         if bandwidth > 0:
             x_min = max(0.0, float(np.min(data)) - bandwidth * 2)
