@@ -5,24 +5,27 @@ A Python CLI tool that aggregates Azure DevOps pipeline (build) duration metrics
 ## Features
 
 - **Multi-organization support**: Process multiple Azure DevOps organizations in a single run
-- **Pipeline aggregation**: Generate per-pipeline statistics including run counts and duration metrics
+- **Pipeline aggregation**: Generate per-pipeline statistics including run counts and duration metrics (average and median)
 - **Job-level details**: Optional detailed job information with agent pool assignments
-- **Human-readable summaries**: Markdown reports with organization and project breakdowns
+- **Human-readable summaries**: Markdown reports with organization and project breakdowns, including median durations
 - **CSV output**: Machine-readable data following documented schemas
 - **Parallel processing**: Configurable threading for improved performance
+- **Distribution chart**: Optional PNG histogram + KDE chart of pipeline run durations (requires matplotlib and numpy)
 
 ## Prerequisites
 
 - **Python**: 3.10 or higher
 - **Platform**: Windows PowerShell 5.1 (cross-platform compatible)
 - **Personal Access Token**: Azure DevOps PAT with appropriate permissions
-- **Dependencies**: `requests` module (`pip install requests`)
+- **Required dependencies**: `requests` module (`pip install requests`)
+- **Optional dependencies**: `matplotlib` and `numpy` for distribution chart output (`pip install matplotlib numpy`)
 
 ## Installation
 
 1. Clone or download this repository
-2. Install dependencies: `pip install requests`
-3. Set `AZDO_PAT` environment variable or use `--pat` flag
+2. Install required dependency: `pip install requests`
+3. (Optional) Install chart dependencies: `pip install matplotlib numpy`
+4. Set `AZDO_PAT` environment variable or use `--pat` flag
 
 ## Quick Start
 
@@ -71,6 +74,7 @@ python get-build-durations.py --org-url https://dev.azure.com/myorg --begin 2024
 | `--output` | | Output CSV file path (defaults to stdout) |
 | `--jobs_output` | | Optional jobs CSV file path |
 | `--summary_output` | | Summary markdown file path (auto-generated if `--output` provided) |
+| `--chart_output` | | Optional PNG distribution chart path (requires `matplotlib` and `numpy`) |
 | `--threads` | | Number of worker threads (default: 4) |
 | `--max-projects` | | Limit number of projects processed (for testing) |
 | `--delay` | | Delay in ms between requests (default: 0) |
@@ -91,6 +95,7 @@ Main aggregation file with one row per pipeline:
 | `pipeline_name` | string | Pipeline display name |
 | `run_count` | integer | Number of runs in date range |
 | `avg_duration_seconds` | integer | Average run duration |
+| `median_duration_seconds` | integer | Median run duration |
 | `total_duration_seconds` | integer | Sum of all run durations |
 
 ### Jobs CSV (`jobs.csv`) - Optional
@@ -110,9 +115,9 @@ Detailed job information when `--jobs_output` specified:
 
 ### Summary Markdown (`summary.md`)
 Human-readable report including:
-- **Overview**: Total organizations, projects, pipelines, runs
-- **By Organization**: Aggregates per organization
-- **By Project**: Aggregates per project within each organization
+- **Overview**: Total organizations, projects, pipelines, runs, average and median duration
+- **By Organization**: Aggregates per organization (including median duration)
+- **By Project**: Aggregates per project within each organization (including median duration)
 
 ## Authentication
 
@@ -203,6 +208,21 @@ python get-build-durations.py `
   --verbose
 ```
 
+### Example 4: Generate Distribution Chart
+```powershell
+# Install optional chart dependencies first
+pip install matplotlib numpy
+
+# Generate a PNG histogram + KDE chart of run duration distribution
+python get-build-durations.py `
+  --org-url https://dev.azure.com/contoso `
+  --begin 2024-01-01 `
+  --end 2024-04-01 `
+  --output q1_pipelines.csv `
+  --chart_output q1_duration_distribution.png `
+  --verbose
+```
+
 ## Error Handling
 
 The tool provides clear error messages and exits with appropriate codes:
@@ -231,9 +251,10 @@ get-build-durations.py: error: the following arguments are required: --org-url
 ## Technical Details
 
 - **Language**: Python 3.10+
-- **Dependencies**: `requests` module for Azure DevOps API calls
+- **Required dependency**: `requests` module for Azure DevOps API calls
+- **Optional dependencies**: `matplotlib` and `numpy` for distribution chart generation (`--chart_output`)
 - **Architecture**: Single-file CLI script
-- **Output**: CSV and Markdown generation
+- **Output**: CSV, Markdown, and optional PNG chart generation
 
 ## Project Structure
 
